@@ -1,0 +1,12 @@
+#foodItemForm{
+    background:#aacee3;
+    position: absolute;
+    margin-top:50vh;
+    margin-left:50vw;
+    transform:translate(-50%,-50%);
+    max-width: 25rem;
+    background-color:"#474646";
+    padding:1rem 3rem 3rem;
+    padding-bottom:1rem;
+    border-radius:50px;
+}
