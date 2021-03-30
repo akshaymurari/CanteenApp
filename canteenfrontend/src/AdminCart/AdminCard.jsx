@@ -25,7 +25,7 @@ const Card = (props) => {
                     accept: "application/json",
                     "content-type": "application/json"
                 },
-                data:JSON.stringify({token,quantity,fooditem})
+                data:JSON.stringify({token,quantity,fooditem,price:props.data.price})
             });
             // console.log(data.data);
             if(data.data.nModified>0){
@@ -40,7 +40,7 @@ const Card = (props) => {
     // console.log(value);
     return (
         <>
-            <div className="card shadow rounded" style={{ maxWidth: "16rem", marginTop: "6rem" }}>
+            <div className="card shadow rounded" style={{ maxWidth: "16rem", marginTop: "2rem" }}>
                 <img src={props.data.pic} class="card-img-top" alt="image not exists" />
                 <div class="card-body">
                     <h5 class="card-title">FoodItem : {props.data.fooditem}</h5>

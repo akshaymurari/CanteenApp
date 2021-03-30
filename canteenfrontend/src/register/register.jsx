@@ -15,8 +15,11 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
+import {useHistory} from 'react-router-dom'
 import { Baseurl } from '../App';
 const Register = () => {
+    const H = useHistory();
+
     const useStyles = makeStyles((theme) => ({
         root: {
             display: 'flex',
@@ -70,9 +73,11 @@ const Register = () => {
             });
             localStorage.setItem("userToken",result.data.token);
             console.log(result.data);
+            H.push("/Canteen");
         }
         catch {
             console.log(`error in addUser in register.jsx function ${result}`);
+            H.push("/error");
         }
     }
     const classes = useStyles();

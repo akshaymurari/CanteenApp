@@ -15,9 +15,9 @@ import './AdminCart.css';
 import Card from './AdminCard';
 
 const AdminCart = () => {
-    const [myFoodItems,setmyFoodItems] = useState([]);
-    const [data,setData] = useState([]);
-    const [add,setadd] = useState(true);
+    const [myFoodItems, setmyFoodItems] = useState([]);
+    const [data, setData] = useState([]);
+    const [add, setadd] = useState(true);
     const H = useHistory();
     const [vis, setVis] = useState(false);
     useEffect(async () => {
@@ -40,13 +40,13 @@ const AdminCart = () => {
         }
     }, []);
     useEffect(async () => {
-        try{
+        try {
             const token = (localStorage.getItem('token'));
             const result = await axios({
-                method:"post",
+                method: "post",
                 url: `${Baseurl}/fooditemsadmin`,
-                headers:{
-                    "content-type":"application/json",
+                headers: {
+                    "content-type": "application/json",
                     "accept": "application/json"
                 },
                 data: JSON.stringify({ token })
@@ -54,11 +54,11 @@ const AdminCart = () => {
             // console.log(result.data);
             setData(result.data);
         }
-        catch(error){
+        catch (error) {
             console.log(error);
             // H.push("/error");
         }
-    },[add]);
+    }, [add]);
     const [values, setValues] = useState({
         fooditem: "",
         quantity: "",
@@ -97,52 +97,52 @@ const AdminCart = () => {
                 price: "",
                 pic: ""
             });
-            setadd((pre)=>!pre);
+            setadd((pre) => !pre);
         }
         catch (error) {
             console.log(`error is ${error}`);
         }
     }
     const closeShop = async () => {
-        try{
+        try {
             const token = localStorage.getItem("token");
             const result = await axios({
-                method:"delete",
-                url:`${Baseurl}/fooditemsadmin`,
-                headers:{
+                method: "delete",
+                url: `${Baseurl}/fooditemsadmin`,
+                headers: {
                     "accept": "application/json",
                     "content-type": "application/json"
                 },
-                data:JSON.stringify({token})
+                data: JSON.stringify({ token })
             });
             // console.log(result.data);
             setData([]);
         }
-        catch(error){
+        catch (error) {
             console.log(error);
         }
     }
     const adminLogout = async () => {
         // console.log("logging out");
         const token = localStorage.getItem("token");
-        try{
+        try {
             const result = await axios({
-                method:"delete",
-                url:`${Baseurl}/admin`,
-                headers:{
+                method: "delete",
+                url: `${Baseurl}/admin`,
+                headers: {
                     "accept": "application/json",
                     "content-type": "application/json"
                 },
-                data:JSON.stringify({token})
+                data: JSON.stringify({ token })
             })
             H.push("/");
         }
-        catch(error){
+        catch (error) {
             console.log(error);
         }
     }
     const onupdatefood = () => {
-        setadd((pre)=>!pre);
+        setadd((pre) => !pre);
     }
     const foodItemForm = () => {
         setVis(true);
@@ -152,7 +152,7 @@ const AdminCart = () => {
             <div
                 id="foodItemForm"
                 className="shadow-lg"
-                style={{ visibility: (!vis) ? "hidden" : "visible",zIndex:99999 }}
+                style={{ visibility: (!vis) ? "hidden" : "visible", zIndex: 99999 }}
             >
                 <TextField id="standard-basic"
                     className="mb-2"
@@ -210,7 +210,7 @@ const AdminCart = () => {
                         style={{ marginLeft: "auto" }}
                         onClick={closeShop}
                     >
-                    Close
+                        Close
                     </Button>
                     <Button
                         className="bg-warning"
@@ -222,12 +222,25 @@ const AdminCart = () => {
                 </Toolbar>
             </AppBar>
             <div className="container-fluid"
-            style={{ height: "100vh",position:"absolute"}}
-            onClick={()=>setVis(false)}>
+                style={{ height: "100vh", position: "absolute" }}
+                onClick={() => setVis(false)}>
             </div>
-            <div className="container-fluid"
-              style={{display:"flex",justifyContent:"space-around",flexWrap:"wrap"}}>
-                {data.map((ele)=> <Card data={{...ele,func:onupdatefood}} />)}
+            <div className="container-fluid">
+                <div className="row">
+                    <Button variant="contained" color="secondary"
+                        className="mx-auto"
+                        style={{ marginTop: "6rem", maxWidth: "16rem" }}>
+                        <Link
+                        to="recievedOrders"
+                        style={{textDecoration: "none",color:"white"}}>
+                            RecievedOrders
+                        </Link>
+                    </Button>
+                </div>
+                <div
+                    style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap" }}>
+                    {data.map((ele) => <Card data={{ ...ele, func: onupdatefood }} />)}
+                </div>
             </div>
         </>
     )

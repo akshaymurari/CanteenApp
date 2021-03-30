@@ -64,9 +64,9 @@ const LoginForm = (params) => {
                     },
                     data:JSON.stringify(values)
                 });
-                localStorage.setItem("token",result.data.token);
                 console.log(result.data);
-                H.push('/UserLogin');
+                localStorage.setItem("userToken",result.data.token);
+                H.push('/Canteen');
             }
             catch(error){
                 console.log(`error in login form ${error}`);

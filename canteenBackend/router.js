@@ -35,22 +35,22 @@ router.post("/register",async (req,res) => {
     }
 });
 
-router.post("/userlogin", async (req,res) => {
-    try{
-        const data = await user.findOne({username:req.body.username});
-        const result = await bcrypt.compare(req.body.password,data.password);
-        if(result){
-            const token = await data.generateAuthToken();
-            res.status(200).send({token});
-        }
-        else{
-            res.send(400).send({result});
-        }
-    }
-    catch(error){
-        console.log(error);
-    }
-});
+// router.post("/userlogin", async (req,res) => {
+//     try{
+//         const data = await user.findOne({username:req.body.username});
+//         const result = await bcrypt.compare(req.body.password,data.password);
+//         if(result){
+//             const token = await data.generateAuthToken();
+//             res.status(200).send({token});
+//         }
+//         else{
+//             res.status(400).send({result});
+//         }
+//     }
+//     catch(error){
+//         console.log(error);
+//     }
+// });
 
 router.post("/adminlogin", async (req,res) => {
     // res.status(200).send(req.body);
@@ -194,6 +194,7 @@ router.delete("/fooditemsadmin",auth,async (req,res) => {
         res.status(400).send({"msg":"INVALID token"});
     }
 });
+
 
 
 

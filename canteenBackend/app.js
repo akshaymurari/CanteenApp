@@ -28,11 +28,17 @@ app.use(bodyParser.json())
 
 app.use(express.json());
 
+// const parseUrl = express.urlencoded({ extended: false });
+// const parseJson = express.json({ extended: false });
+
 
 const router = require("./router.js");
 
+const userrouter = require("./userrouter.js");
+
 app.use(router);
 
+app.use(userrouter);
 // C:\Users\akshay murari\canteenApp\canteenBackend\public\images
 // C:\Users\akshay murari\canteenApp\canteenBackend\public\images\20201002_124842.jpg
 

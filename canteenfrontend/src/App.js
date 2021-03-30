@@ -5,8 +5,8 @@ import Register from './register/register';
 import AdminLogin from './AdminLogin/AdminLogin';
 import UserLogin from './UserLogin/UserLogin';
 import AdminCart from './AdminCart/AdminCart';
-
-
+import Canteen from './Canteen/Canteen';
+import RecievedOrders from './RecievedOrders/RecievedOrders';
 
 export const Baseurl = "http://localhost:8000";
 
@@ -24,6 +24,12 @@ function App() {
        />
 
       <Route exact path="/AdminCart" component={AdminCart}
+      />
+
+      <Route exact path = "/Canteen" component={Canteen} 
+      />
+
+      <Route exact path="/recievedOrders" component={RecievedOrders}
       />
 
       <Route exact path="/" component={Welcome}
