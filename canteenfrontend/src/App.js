@@ -7,6 +7,7 @@ import UserLogin from './UserLogin/UserLogin';
 import AdminCart from './AdminCart/AdminCart';
 import Canteen from './Canteen/Canteen';
 import RecievedOrders from './RecievedOrders/RecievedOrders';
+import Payment from './Payment/Payment';
 
 export const Baseurl = "http://localhost:8000";
 
@@ -27,6 +28,9 @@ function App() {
       />
 
       <Route exact path = "/Canteen" component={Canteen} 
+      />
+    
+      <Route exact path = "/payment" component={Payment} 
       />
 
       <Route exact path="/recievedOrders" component={RecievedOrders}

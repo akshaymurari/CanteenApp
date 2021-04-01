@@ -106,59 +106,13 @@ userrouter.patch("/buyitem",userauth,async (req,res) => {
             });
             console.log(data);
             await data.save();
-            res.status(200).send(result);
+            res.status(200).send(data);
         }
         // const data = await result.updateOne({quantity:{$gte:0},[$inc:{quantity:-req.body.quantity}]});
     }
     catch(error){
         console.log(error);
         res.status(400).send({"msg":"stock overflow"})
-    }
-});
-
-userrouter.post("/payment",async (req,res) => {
-    console.log(req.body);
-    // For Staging 
-    try{
-        // var environment = Paytm.LibraryConstants.STAGING_ENVIRONMENT;
-        // var mid = "hQTIbQ06728282377422";
-        // var key = "c%HxwzNzc6G5p86h";
-        // var website = "WEBSTAGING";
-        // var client_id = "1";
-    
-        // var callbackUrl = "http://localhost:3000/Canteen";
-        // Paytm.MerchantProperties.setCallbackUrl(callbackUrl);
-    
-        // Paytm.MerchantProperties.initialize(environment, mid, key, client_id, website);
-        
-        // var channelId = Paytm.EChannelId.WEB;
-        // var orderId = req.body.order_id;
-        // var txnAmount = Paytm.Money.constructWithCurrencyAndValue(Paytm.EnumCurrency.INR, req.body.amount);
-        // var userInfo = new Paytm.UserInfo(req.body.name); 
-        // // userInfo.setAddress("CUSTOMER_ADDRESS");
-        // userInfo.setEmail(req.body.email);
-        // // userInfo.setFirstName(req.body);
-        // // userInfo.setLastName("CUSTOMER_LAST_NAME");
-        // userInfo.setMobile(req.body.phone);
-        // // userInfo.setPincode("CUSTOMER_PINCODE");
-        // var paymentDetailBuilder = new Paytm.PaymentDetailBuilder(channelId, orderId, txnAmount, userInfo);
-        // // console.log(paymentDetailBuilder);
-        // var paymentDetail = paymentDetailBuilder.build();
-        // // console.log(paymentDetail);
-        // var response = await Paytm.Payment.createTxnToken(paymentDetail);
-        // console.log("response :")
-        // console.log(response);
-        var orderId = req.body.order_id;
-        var readTimeout = 80000;
-        var paymentStatusDetailBuilder = new Paytm.PaymentStatusDetailBuilder(orderId);
-        var paymentStatusDetail = paymentStatusDetailBuilder.setReadTimeout(readTimeout).build();
-        var response = await Paytm.Payment.getPaymentStatus(paymentStatusDetail);
-        console.log(response);
-        res.status(200).send(response);
-    }
-    catch(error){
-        console.log(error);
-        res.status(400).send("error");
     }
 });
 

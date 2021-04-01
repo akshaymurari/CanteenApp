@@ -20,7 +20,7 @@ const Card = (props) => {
                 data:JSON.stringify({token,_id:props.data._id})
             });
             // console.log(result.data);
-            // props.data.func();
+            props.data.func();
         }
         catch{
             console.log("error");
@@ -47,4 +47,4 @@ const Card = (props) => {
     )
 }
 
-export default Card
+export default Card;

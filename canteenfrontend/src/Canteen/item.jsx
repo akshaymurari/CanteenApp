@@ -4,8 +4,10 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import axios from 'axios';
 import { Baseurl } from '../App';
+import {useHistory} from 'react-router-dom';
 
 const Card = (props) => {
+    const H = useHistory();
     const [value, setvalue] = useState("");
     const [paytm, setPaytm] = useState({
         amount: "",
@@ -33,7 +35,10 @@ const Card = (props) => {
                 data: JSON.stringify({ token, ...props.data, quantity: value,...paytm })
             });
             console.log(result.data);
-            props.data.func();
+            // props.data.func();
+            H.push("/payment",{amount:result.data.totalAmount});
+            // H.push("/payment");
+
         }
         catch (error) {
             console.log(error);
