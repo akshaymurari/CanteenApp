@@ -2,7 +2,11 @@ require('dotenv').config();
 
 const express = require("express");
 
-const {v4:uuidv4}=require('uuid');
+const axios = require("axios");
+
+const {
+    v4: uuidv4
+} = require('uuid');
 
 const https = require('https');
 
@@ -10,7 +14,7 @@ const https = require('https');
 
 const path = require("path");
 
-const formidable=require('formidable')
+const formidable = require('formidable')
 
 const PaytmChecksum = require("./Paytm/checksum");
 
@@ -67,59 +71,75 @@ app.use(express.static(path.join(__dirname, 'public', 'images')));
 
 const port = process.env.PORT || 8000;
 
-router.post('/callback',(req,res)=>
-{
+app.post('/callback', (req, res) => {
+    console.log(req.body);
+    const form = new formidable.IncomingForm();
 
-const form=new formidable.IncomingForm();
+    form.parse(req, (err, fields, file) => {
+        console.log(`fields : ${fields}`)
+        fields=req.body
+        paytmChecksum = fields.CHECKSUMHASH;
+        // delete fields.CHECKSUMHASH;
+        var isVerifySignature = PaytmChecksum.verifySignature(fields, process.env.PAYTM_MERCHANT_KEY, paytmChecksum);
+        console.log(isVerifySignature);
+        if (isVerifySignature) {
+            var paytmParams = {};
+            paytmParams["MID"] = fields.MID;
+            paytmParams["ORDERID"] = fields.ORDERID;
+// {"TXNID":"20210418111212800110168690002530268","BANKTXNID":"64419556","ORDERID":"313fc939-0ee3-4d88-bef7-5de9cc5949a2","TXNAMOUNT":"1.00","STATUS":"TXN_SUCCESS","TXNTYPE":"SALE","GATEWAYNAME":"WALLET","RESPCODE":"01","RESPMSG":"Txn Success","BANKNAME":"WALLET","MID":"hQTIbQ06728282377422","PAYMENTMODE":"PPI","REFUNDAMT":"0.00","TXNDATE":"2021-04-18 17:29:27.0"}
+            /*
+            * Generate checksum by parameters we have in body
+            * Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
+            */
+            PaytmChecksum.generateSignature((paytmParams), process.env.PAYTM_MERCHANT_KEY).then(function(checksum){
+            
+                paytmParams["CHECKSUMHASH"]=checksum
 
-form.parse(req,(err,fields,file)=>
-{
-paytmChecksum = fields.CHECKSUMHASH;
-delete fields.CHECKSUMHASH;
-
-var isVerifySignature = PaytmChecksum.verifySignature(fields, process.env.PAYTM_MERCHANT_KEY, paytmChecksum);
-if (isVerifySignature) {
-    var paytmParams = {};
-    paytmParams["MID"]     = fields.MID;
-    paytmParams["ORDERID"] = fields.ORDERID;
-    console.log(paytmParams);
-    PaytmChecksum.generateSignature(paytmParams, process.env.PAYTM_MERCHANT_KEY).then(function(checksum){
-        paytmParams["CHECKSUMHASH"] = checksum;
-        var post_data = JSON.stringify(paytmParams);
-        var options = {
-    
-            /* for Staging */
-            hostname: 'securegw-stage.paytm.in',
-    
-            /* for Production */
-            // hostname: 'securegw.paytm.in',
-    
-            port: 443,
-            path: '/order/status',
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': post_data.length
-            }
-        };
-        var response = "";
-        var post_req = https.request(options, function(post_res) {
-            post_res.on('data', function (chunk) {
-                response += chunk;
+            
+                var post_data = JSON.stringify(paytmParams);
+            
+                var options = {
+            
+                    /* for Staging */
+                    hostname: 'securegw-stage.paytm.in',
+            
+                    /* for Production */
+                    // hostname: 'securegw.paytm.in',
+            
+                    port: 443,
+                    path:"/order/status",
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': post_data.length
+                    }
+                };
+                // {"TXNID":"20210418111212800110168690002530268","BANKTXNID":"64419556","ORDERID":"313fc939-0ee3-4d88-bef7-5de9cc5949a2","TXNAMOUNT":"1.00","STATUS":"TXN_SUCCESS","TXNTYPE":"SALE","GATEWAYNAME":"WALLET","RESPCODE":"01","RESPMSG":"Txn Su
+                // ccess","BANKNAME":"WALLET","MID":"hQTIbQ06728282377422","PAYMENTMODE":"PPI","REFUNDAMT":"0.00","TXNDATE":"2021-04-18 17:29:27.0"}
+                var response = "";
+                var post_req = https.request(options, function(post_res) {
+                    post_res.on('data', function (chunk) {
+                        response += chunk;
+                    });
+            
+                    post_res.on('end', function(){
+                        console.log('Response: ', response);
+                        res.end("sucess");
+                        // res.send((response));
+                    });
+                });
+            
+                post_req.write(post_data);
+                post_req.end();
             });
-    
-            post_res.on('end', function(){
-                res.json(response)
-            });
-        });
-    
-        post_req.write(post_data);
-        post_req.end();
-    });        
-} else {
-	console.log("Checksum Mismatched");
-}
-});
+            
+        } else {
+            console.log("Checksum Mismatched");
+            res.send({
+                "msg":"transaction failed"
+            })
+        }
+    });
 })
 
 
@@ -140,10 +160,10 @@ app.post("/paynow", [parseUrl, parseJson], (req, res) => {
     } else {
         var params = {};
         params['MID'] = process.env.PAYTM_MID,
-        params['WEBSITE'] = process.env.PAYTM_WEBSITE,
-        params['ORDER_ID'] = uuidv4(),
-        params['EMAIL'] = paymentDetails.customerEmail,
-        params['CHANNEL_ID'] = 'WEB';
+            params['WEBSITE'] = process.env.PAYTM_WEBSITE,
+            params['ORDER_ID'] = uuidv4(),
+            params['EMAIL'] = paymentDetails.customerEmail,
+            params['CHANNEL_ID'] = 'WEB';
         params['INDUSTRY_TYPE_ID'] = 'Retail';
         params['CUST_ID'] = paymentDetails.customerId;
         params['TXN_AMOUNT'] = paymentDetails.amount;
