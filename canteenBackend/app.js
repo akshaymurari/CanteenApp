@@ -6,7 +6,7 @@ const {v4:uuidv4}=require('uuid');
 
 const https = require('https');
 
-const serveStatic = require('serve-static');
+// const serveStatic = require('serve-static');
 
 const path = require("path");
 
@@ -67,64 +67,61 @@ app.use(express.static(path.join(__dirname, 'public', 'images')));
 
 const port = process.env.PORT || 8000;
 
-router.post('/callback', (req, res) => {
-    console.log("callback")
+router.post('/callback',(req,res)=>
+{
 
-    const form = new formidable.IncomingForm();
+const form=new formidable.IncomingForm();
 
-    form.parse(req, (err, fields, file) => {
-        paytmChecksum = fields.CHECKSUMHASH;
-        delete fields.CHECKSUMHASH;
+form.parse(req,(err,fields,file)=>
+{
+paytmChecksum = fields.CHECKSUMHASH;
+delete fields.CHECKSUMHASH;
 
-        var isVerifySignature = PaytmChecksum.verifySignature(fields, process.env.PAYTM_MERCHANT_KEY, paytmChecksum);
-        if (isVerifySignature) {
-            var paytmParams = {};
-            paytmParams["MID"] = fields.MID;
-            paytmParams["ORDERID"] = fields.ORDERID;
-            PaytmChecksum.generateSignature(paytmParams, process.env.PAYTM_MERCHANT_KEY).then(function (checksum) {
-
-                paytmParams["CHECKSUMHASH"] = checksum;
-
-                var post_data = JSON.stringify(paytmParams);
-
-                var options = {
-
-                    /* for Staging */
-                    hostname: 'securegw-stage.paytm.in',
-
-                    /* for Production */
-                    // hostname: 'securegw.paytm.in',
-
-                    port: 443,
-                    path: '/order/status',
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Content-Length': post_data.length
-                    }
-                };
-
-                var response = "";
-                var post_req = https.request(options, function (post_res) {
-                    post_res.on('data', function (chunk) {
-                        response += chunk;
-                    });
-
-                    post_res.on('end', function () {
-                        console.log(response);
-                        res.status(200).json(response);
-                    });
-                });
-                console.log(response);
-                post_req.write(post_data);
-                post_req.send(post_data);
+var isVerifySignature = PaytmChecksum.verifySignature(fields, process.env.PAYTM_MERCHANT_KEY, paytmChecksum);
+if (isVerifySignature) {
+    var paytmParams = {};
+    paytmParams["MID"]     = fields.MID;
+    paytmParams["ORDERID"] = fields.ORDERID;
+    console.log(paytmParams);
+    PaytmChecksum.generateSignature(paytmParams, process.env.PAYTM_MERCHANT_KEY).then(function(checksum){
+        paytmParams["CHECKSUMHASH"] = checksum;
+        var post_data = JSON.stringify(paytmParams);
+        var options = {
+    
+            /* for Staging */
+            hostname: 'securegw-stage.paytm.in',
+    
+            /* for Production */
+            // hostname: 'securegw.paytm.in',
+    
+            port: 443,
+            path: '/order/status',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': post_data.length
+            }
+        };
+        var response = "";
+        var post_req = https.request(options, function(post_res) {
+            post_res.on('data', function (chunk) {
+                response += chunk;
             });
-        } else {
-            console.log("Checksum Mismatched");
-            res.status(400).send("failed");
-        }
-    })
+    
+            post_res.on('end', function(){
+                res.json(response)
+            });
+        });
+    
+        post_req.write(post_data);
+        post_req.end();
+    });        
+} else {
+	console.log("Checksum Mismatched");
+}
+});
 })
+
 
 
 
@@ -151,7 +148,7 @@ app.post("/paynow", [parseUrl, parseJson], (req, res) => {
         params['CUST_ID'] = paymentDetails.customerId;
         params['TXN_AMOUNT'] = paymentDetails.amount;
         params['CALLBACK_URL'] = 'http://localhost:8000/callback';
-        params['EMAIL'] = paymentDetails.customerEmail;
+        // params['EMAIL'] = paymentDetails.customerEmail;
         params['MOBILE_NO'] = paymentDetails.customerPhone;
         var paytmChecksum = PaytmChecksum.generateSignature(params, process.env.PAYTM_MERCHANT_KEY);
         paytmChecksum.then(function (checksum) {
