@@ -36,7 +36,7 @@ const Card = (props) => {
             });
             console.log(result.data);
             // props.data.func();
-            H.push("/payment",{amount:result.data.totalAmount});
+            H.push("/payment",{amount:result.data.totalAmount,id:result.data._id});
             // H.push("/payment");
 
         }

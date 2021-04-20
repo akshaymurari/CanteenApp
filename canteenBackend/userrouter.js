@@ -116,6 +116,8 @@ userrouter.patch("/buyitem",userauth,async (req,res) => {
     }
 });
 
+// router.patch()
+
 userrouter.get("/recievedFood",auth,async (req,res)=>{
     try {
         const result = await recievedFood.find({});

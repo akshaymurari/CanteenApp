@@ -71,6 +71,15 @@ app.use(express.static(path.join(__dirname, 'public', 'images')));
 
 const port = process.env.PORT || 8000;
 
+app.get("/dd",(req,res)=>{
+    console.log("fjjf")
+    res.send("helloo");
+})
+
+app.post("/ff",(req,res)=>{
+    res.redirect("/dd");
+})
+
 app.post('/callback', (req, res) => {
     console.log(req.body);
     const form = new formidable.IncomingForm();
@@ -79,7 +88,7 @@ app.post('/callback', (req, res) => {
         console.log(`fields : ${fields}`)
         fields=req.body
         paytmChecksum = fields.CHECKSUMHASH;
-        // delete fields.CHECKSUMHASH;
+        delete fields.CHECKSUMHASH;
         var isVerifySignature = PaytmChecksum.verifySignature(fields, process.env.PAYTM_MERCHANT_KEY, paytmChecksum);
         console.log(isVerifySignature);
         if (isVerifySignature) {
@@ -117,6 +126,7 @@ app.post('/callback', (req, res) => {
                 // {"TXNID":"20210418111212800110168690002530268","BANKTXNID":"64419556","ORDERID":"313fc939-0ee3-4d88-bef7-5de9cc5949a2","TXNAMOUNT":"1.00","STATUS":"TXN_SUCCESS","TXNTYPE":"SALE","GATEWAYNAME":"WALLET","RESPCODE":"01","RESPMSG":"Txn Su
                 // ccess","BANKNAME":"WALLET","MID":"hQTIbQ06728282377422","PAYMENTMODE":"PPI","REFUNDAMT":"0.00","TXNDATE":"2021-04-18 17:29:27.0"}
                 var response = "";
+                let redirect = false;
                 var post_req = https.request(options, function(post_res) {
                     post_res.on('data', function (chunk) {
                         response += chunk;
@@ -124,20 +134,39 @@ app.post('/callback', (req, res) => {
             
                     post_res.on('end', function(){
                         console.log('Response: ', response);
-                        res.end("sucess");
+                        const msg = JSON.parse(response);
+                        // res.json(msg);
+                        if(msg.STATUS==="TXN_SUCCESS"){
+                            console.log(msg)
+                            // res.writeHead(200)
+                            redirect=true
+                        }
+                        try{
+                            // res.redirect("https://sequelize.org/master/manual/raw-queries.html");
+                            // res.render("<h1>success</h1>")
+                        }catch(error){
+                            console.log(error);
+                        }
+                        
+                        console.log("msg is",msg);
+                        // res.end("sucess");
                         // res.send((response));
+                        // res.redirect("http://localhost:3000/")
                     });
                 });
-            
                 post_req.write(post_data);
                 post_req.end();
+                console.log("fkfkf")
+                console.log(redirect);
+                // res.redirect(307,"http://localhost:3000")
             });
+            // res.redirect("http://localhost:3000/")
             
         } else {
             console.log("Checksum Mismatched");
-            res.send({
-                "msg":"transaction failed"
-            })
+            // res.send({
+            //     "msg":"transaction failed"
+            // })
         }
     });
 })
@@ -177,7 +206,9 @@ app.post("/paynow", [parseUrl, parseJson], (req, res) => {
                 ...params,
                 "CHECKSUMHASH": checksum
             }
-            res.json(paytmParams)
+            res.json(paytmParams);
+
+            // res.redirect(307,"http://localhost:3000")
         }).catch(function (error) {
             console.log(error);
         });

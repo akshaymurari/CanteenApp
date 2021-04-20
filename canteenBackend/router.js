@@ -1,8 +1,14 @@
 const express = require('express');
 
+const Razorpay = require("razorpay");
+
+const shortid = require("shortid");
+
 const bcrypt = require('bcrypt');
 
 const jwt = require('jsonwebtoken');
+
+const recievedFood = require("./models/admin/recievedFood");
 
 const user = require("./models/user/users");
 
@@ -14,9 +20,77 @@ const auth = require("./Auth/auth");
 
 const router = new express.Router();
 
+const razorpay = new Razorpay({
+	key_id: 'rzp_test_qJLV4RcpSNFD8a',
+	key_secret: 'SEE7nABntHyRRSy2fsequL6O'
+})
+
+
 router.get("",(req,res) => {
     res.send("hello...");
 });
+
+router.post("/verification",async (req,res)=>{
+    const secret = "12345678"
+    console.log("heloo");
+    console.log(req.body.payload.payment.entity);
+    const _id=req.body.payload.payment.entity.description;
+    console.log(_id);
+    const crypto = require('crypto')
+
+	const shasum = crypto.createHmac('sha256', secret)
+	shasum.update(JSON.stringify(req.body))
+	const digest = shasum.digest('hex')
+
+	console.log(digest, req.headers['x-razorpay-signature'])
+
+	if (digest === req.headers['x-razorpay-signature']) {
+        console.log('request is legit');
+        try{
+            const data = await recievedFood.updateOne({_id},{
+                status:"paid"
+            })
+            console.log(data);
+            res.status(200).send({"msg":"ok"})
+
+        }catch{
+            res.status(400).send("invalid");
+        }
+		// process it
+		// require('fs').writeFileSync('payment1.json', JSON.stringify(req.body, null, 4))
+	} else {
+        res.status(400).send("invalid");
+		// pass it
+	}
+})
+
+
+
+router.post("/razorpay",async (req,res)=>{
+    console.log(req.body)
+    const payment_capture = 1
+	const amount = new Number(req.body.amount);
+	const currency = 'INR'
+
+	const options = {
+		amount: (amount * 100).toString(),
+		currency,
+		receipt: shortid.generate(),
+		payment_capture
+	}
+
+	try {
+		const response = await razorpay.orders.create(options)
+		console.log(response)
+		res.json({
+			id: response.id,
+			currency: response.currency,
+			amount: response.amount
+		})
+	} catch (error) {
+		console.log(error)
+	}
+})
 
 router.post("/register",async (req,res) => {
     console.log(req.body);
